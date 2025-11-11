@@ -1,0 +1,1 @@
+Faktur app initialization
