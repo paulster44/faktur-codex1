@@ -1,0 +1,41 @@
+name: faktur
+description: Original invoicing app for iOS and macOS with clean architecture and Riverpod.
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+  flutter: '>=3.19.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  flutter_riverpod: ^2.5.1
+  go_router: ^14.0.2
+  intl: ^0.18.1
+  drift: ^2.16.0
+  drift_flutter: ^0.18.4
+  sqlite3_flutter_libs: ^0.5.18
+  path_provider: ^2.1.2
+  pdf: ^3.11.0
+  printing: ^5.12.0
+  equatable: ^2.0.5
+  collection: ^1.18.0
+  share_plus: ^7.2.1
+  flutter_secure_storage: ^9.0.0
+  synchronized: ^3.1.0
+  json_annotation: ^4.9.0
+  crypto: ^3.0.3
+
+flutter:
+  uses-material-design: true
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  build_runner: ^2.4.8
+  drift_dev: ^2.16.0
+  json_serializable: ^6.7.1
