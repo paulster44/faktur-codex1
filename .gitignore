@@ -1,0 +1,31 @@
+# Flutter/Dart/Pub related
+.dart_tool/
+.packages
+.pub-cache/
+build/
+**/GeneratedPluginRegistrant.dart
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code related
+.vscode/
+
+# macOS
+**/*.xcworkspace
+DerivedData/
+
+# iOS
+Pods/
+
+# Drift generated files
+lib/src/data/local/*.g.dart
+
+# Coverage
+coverage/
+
+# Logs
+*.log
