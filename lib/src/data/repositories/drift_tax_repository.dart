@@ -1,14 +1,14 @@
 import 'package:drift/drift.dart';
 
-import '../../domain/entities/tax_category.dart';
+import '../../domain/entities/tax_category.dart' as model;
 import '../../domain/repositories/tax_category_repository.dart';
-import '../local/faktur_database.dart';
+import '../local/faktur_database.dart' as db;
 
 /// Drift repository for tax categories.
 class DriftTaxCategoryRepository implements TaxCategoryRepository {
   DriftTaxCategoryRepository(this._database);
 
-  final FakturDatabase _database;
+  final db.FakturDatabase _database;
 
   @override
   Future<void> delete(int id) {
@@ -16,8 +16,8 @@ class DriftTaxCategoryRepository implements TaxCategoryRepository {
   }
 
   @override
-  Future<int> upsert(TaxCategory taxCategory) {
-    final companion = TaxCategoriesCompanion(
+  Future<int> upsert(model.TaxCategory taxCategory) {
+    final companion = db.TaxCategoriesCompanion(
       id: taxCategory.id == 0 ? const Value.absent() : Value(taxCategory.id),
       name: Value(taxCategory.name),
       ratePercent: Value(taxCategory.ratePercent),
@@ -27,11 +27,11 @@ class DriftTaxCategoryRepository implements TaxCategoryRepository {
   }
 
   @override
-  Stream<List<TaxCategory>> watchAll() {
+  Stream<List<model.TaxCategory>> watchAll() {
     return _database.select(_database.taxCategories).watch().map(
           (rows) => rows
               .map(
-                (row) => TaxCategory(
+                (row) => model.TaxCategory(
                   id: row.id,
                   name: row.name,
                   ratePercent: row.ratePercent,

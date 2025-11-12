@@ -1,12 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/local/faktur_database.dart';
+import '../../data/local/faktur_database.dart' as db;
 import '../../data/repositories/drift_catalog_repository.dart';
 import '../../data/repositories/drift_client_repository.dart';
 import '../../data/repositories/drift_invoice_repository.dart';
 import '../../data/repositories/drift_payment_repository.dart';
 import '../../data/repositories/drift_preference_repository.dart';
 import '../../data/repositories/drift_tax_repository.dart';
+import '../../domain/entities/tax_category.dart' as model;
 import '../../domain/repositories/catalog_repository.dart';
 import '../../domain/repositories/client_repository.dart';
 import '../../domain/repositories/invoice_repository.dart';
@@ -16,8 +17,8 @@ import '../../domain/repositories/tax_category_repository.dart';
 import '../../domain/usecases/calculate_invoice_totals.dart';
 
 /// Database provider used across repositories.
-final databaseProvider = Provider<FakturDatabase>((ref) {
-  final database = FakturDatabase();
+final databaseProvider = Provider<db.FakturDatabase>((ref) {
+  final database = db.FakturDatabase();
   ref.onDispose(database.close);
   return database;
 });
@@ -30,7 +31,7 @@ final taxRepositoryProvider = Provider<TaxCategoryRepository>((ref) {
   return DriftTaxCategoryRepository(ref.watch(databaseProvider));
 });
 
-final taxCategoriesStreamProvider = StreamProvider((ref) {
+final taxCategoriesStreamProvider = StreamProvider<List<model.TaxCategory>>((ref) {
   return ref.watch(taxRepositoryProvider).watchAll();
 });
 
@@ -53,7 +54,7 @@ final preferenceRepositoryProvider = Provider<PreferenceRepository>((ref) {
 final invoiceCalculatorProvider = Provider<InvoiceCalculator>((ref) {
   final categories = ref.watch(taxCategoriesStreamProvider).maybeWhen(
         data: (data) => data,
-        orElse: () => const [],
+        orElse: () => const <model.TaxCategory>[],
       );
   return InvoiceCalculator(taxCategories: categories);
 });

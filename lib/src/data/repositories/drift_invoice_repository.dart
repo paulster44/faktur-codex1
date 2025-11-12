@@ -1,18 +1,18 @@
 import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
 
-import '../../domain/entities/invoice.dart';
-import '../../domain/entities/invoice_line.dart';
-import '../../domain/entities/payment.dart';
+import '../../domain/entities/invoice.dart' as model;
+import '../../domain/entities/invoice_line.dart' as model;
+import '../../domain/entities/payment.dart' as model;
 import '../../domain/repositories/invoice_repository.dart';
 import '../../domain/value_objects/money.dart';
-import '../local/faktur_database.dart';
+import '../local/faktur_database.dart' as db;
 
 /// Drift repository for invoices and related aggregates.
 class DriftInvoiceRepository implements InvoiceRepository {
   DriftInvoiceRepository(this._database);
 
-  final FakturDatabase _database;
+  final db.FakturDatabase _database;
 
   static const _invoiceCounterKey = 'invoice_number';
 
@@ -26,7 +26,7 @@ class DriftInvoiceRepository implements InvoiceRepository {
   }
 
   @override
-  Future<Invoice?> findById(int id) async {
+  Future<model.Invoice?> findById(int id) async {
     final row = await (_database.select(_database.invoices)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
     if (row == null) {
       return null;
@@ -35,9 +35,9 @@ class DriftInvoiceRepository implements InvoiceRepository {
   }
 
   @override
-  Future<int> upsert(Invoice invoice) async {
+  Future<int> upsert(model.Invoice invoice) async {
     return _database.transaction(() async {
-      final invoiceCompanion = InvoicesCompanion(
+      final invoiceCompanion = db.InvoicesCompanion(
         id: invoice.id == 0 ? const Value.absent() : Value(invoice.id),
         invoiceNumber: Value(invoice.invoiceNumber),
         clientId: Value(invoice.clientId),
@@ -61,7 +61,7 @@ class DriftInvoiceRepository implements InvoiceRepository {
       await (_database.delete(_database.invoiceLines)..where((tbl) => tbl.invoiceId.equals(id))).go();
       for (final line in invoice.lines) {
         await _database.into(_database.invoiceLines).insert(
-              InvoiceLinesCompanion.insert(
+              db.InvoiceLinesCompanion.insert(
                 invoiceId: id,
                 itemName: line.itemName,
                 itemDescription: Value(line.itemDescription),
@@ -79,7 +79,7 @@ class DriftInvoiceRepository implements InvoiceRepository {
       await (_database.delete(_database.payments)..where((tbl) => tbl.invoiceId.equals(id))).go();
       for (final payment in invoice.payments) {
         await _database.into(_database.payments).insert(
-              PaymentsCompanion.insert(
+              db.PaymentsCompanion.insert(
                 invoiceId: id,
                 amount: payment.amount.cents,
                 date: payment.date,
@@ -95,9 +95,9 @@ class DriftInvoiceRepository implements InvoiceRepository {
   }
 
   @override
-  Stream<List<Invoice>> watchInvoices({
+  Stream<List<model.Invoice>> watchInvoices({
     String search = '',
-    InvoiceStatus? status,
+    model.InvoiceStatus? status,
     InvoiceDateRange? issuedBetween,
     int? clientId,
     String? currency,
@@ -131,17 +131,17 @@ class DriftInvoiceRepository implements InvoiceRepository {
     });
   }
 
-  Future<Invoice> _mapAggregate(InvoicesData row) async {
+  Future<model.Invoice> _mapAggregate(db.Invoice row) async {
     final lines = await (_database.select(_database.invoiceLines)..where((tbl) => tbl.invoiceId.equals(row.id))).get();
     final payments = await (_database.select(_database.payments)..where((tbl) => tbl.invoiceId.equals(row.id))).get();
-    return Invoice(
+    return model.Invoice(
       id: row.id,
       invoiceNumber: row.invoiceNumber,
       clientId: row.clientId,
       issueDate: row.issueDate,
       dueDate: row.dueDate,
       currency: row.currency,
-      status: InvoiceStatus.values.firstWhereOrNull((element) => element.name == row.status) ?? InvoiceStatus.draft,
+      status: model.InvoiceStatus.values.firstWhereOrNull((element) => element.name == row.status) ?? model.InvoiceStatus.draft,
       notes: row.notes,
       terms: row.terms,
       subtotal: Money(row.subtotal),
@@ -153,7 +153,7 @@ class DriftInvoiceRepository implements InvoiceRepository {
       updatedAt: row.updatedAt,
       lines: lines
           .map(
-            (line) => InvoiceLine(
+            (line) => model.InvoiceLine(
               id: line.id,
               invoiceId: line.invoiceId,
               itemName: line.itemName,
@@ -170,7 +170,7 @@ class DriftInvoiceRepository implements InvoiceRepository {
           .toList(),
       payments: payments
           .map(
-            (payment) => Payment(
+            (payment) => model.Payment(
               id: payment.id,
               invoiceId: payment.invoiceId,
               amount: Money(payment.amount),

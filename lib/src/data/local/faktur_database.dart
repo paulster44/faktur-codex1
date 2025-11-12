@@ -137,11 +137,11 @@ class FakturDatabase extends _$FakturDatabase {
     return transaction(() async {
       final existing = await (select(counters)..where((tbl) => tbl.key.equals(key))).getSingleOrNull();
       if (existing == null) {
-        final id = await into(counters).insert(CountersCompanion.insert(key: key, currentValue: 1));
+        await into(counters).insert(CountersCompanion.insert(key: key, currentValue: 1));
         return 1;
       }
       final updated = existing.currentValue + 1;
-      await update(counters).replace(existing.copyWith(currentValue: Value(updated)));
+      await update(counters).replace(existing.copyWith(currentValue: updated));
       return updated;
     });
   }
